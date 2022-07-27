@@ -2169,13 +2169,30 @@ ReturnCode AclRuleManager::addDefaultAclRuleInPreIngressTable(
         << " should have and only have 1 ip prefix defined in IntfsOrch, but "
         << lo_intfs_iter->second.ip_addresses.size() << " was found.");
   }
-  acl_entry_attr.id = SAI_ACL_ENTRY_ATTR_FIELD_DST_IPV6;
-  memcpy(acl_entry_attr.value.aclfield.data.ip6,
-         lo_intfs_iter->second.ip_addresses.begin()->getIp().getV6Addr(),
-         sizeof(sai_ip6_t));
-  memcpy(acl_entry_attr.value.aclfield.mask.ip6,
-         swss::IpAddress("ffff:ffff:ffff:ffff::").getV6Addr(),
-         sizeof(sai_ip6_t));
+  // With P4 SAI CL cl/461728094 submitted, the
+  // SAI_ACL_ENTRY_ATTR_FIELD_DST_IPV6 is not available in PRE_INGRESS ACL table
+  // definition SAI_ACL_ENTRY_ATTR_FIELD_DST_IPV6_WORD3 and
+  // SAI_ACL_ENTRY_ATTR_FIELD_DST_IPV6_WORD2 are used
+  acl_entry_attr.id = SAI_ACL_ENTRY_ATTR_FIELD_DST_IPV6_WORD3;
+  memcpy(&acl_entry_attr.value.aclfield.data.ip6[0],
+         &lo_intfs_iter->second.ip_addresses.begin()->getIp().getV6Addr()[0],
+         IPV6_SINGLE_WORD_BYTES_LENGTH);
+  memcpy(&acl_entry_attr.value.aclfield.mask.ip6[0],
+         &swss::IpAddress("ffff:ffff:ffff:ffff::").getV6Addr()[0],
+         IPV6_SINGLE_WORD_BYTES_LENGTH);
+  acl_entry_attr.value.aclfield.enable = true;
+  acl_entry_attrs.push_back(acl_entry_attr);
+
+  acl_entry_attr.id = SAI_ACL_ENTRY_ATTR_FIELD_DST_IPV6_WORD2;
+  memcpy(&acl_entry_attr.value.aclfield.data.ip6[IPV6_SINGLE_WORD_BYTES_LENGTH],
+         &lo_intfs_iter->second.ip_addresses.begin()
+             ->getIp()
+             .getV6Addr()[IPV6_SINGLE_WORD_BYTES_LENGTH],
+         IPV6_SINGLE_WORD_BYTES_LENGTH);
+  memcpy(&acl_entry_attr.value.aclfield.mask.ip6[IPV6_SINGLE_WORD_BYTES_LENGTH],
+         &swss::IpAddress("ffff:ffff:ffff:ffff::")
+             .getV6Addr()[IPV6_SINGLE_WORD_BYTES_LENGTH],
+         IPV6_SINGLE_WORD_BYTES_LENGTH);
   acl_entry_attr.value.aclfield.enable = true;
   acl_entry_attrs.push_back(acl_entry_attr);
 
