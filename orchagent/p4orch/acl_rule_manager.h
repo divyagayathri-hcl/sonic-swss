@@ -163,7 +163,7 @@ class AclRuleManager : public ObjectManagerInterface
     std::vector<P4UserDefinedTrapHostifTableEntry> m_userDefinedTraps;
     // This flag is to indicate if the default VRF
     // override rule in PRE_INGRESS table is added or not.
-    std::map<std::string, bool> m_defaultVrfOverridePreingressRuleCreated;
+    bool m_defaultVrfOverridePreingressRuleCreated;
 
     friend class AclTableManager;
     friend class p4orch::test::AclManagerTest;

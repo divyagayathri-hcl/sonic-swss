@@ -2088,8 +2088,41 @@ ReturnCode AclRuleManager::addDefaultAclRuleInPreIngressTable(
     const std::string& table_name) {
   SWSS_LOG_ENTER();
 
+  const auto* acl_table =
+      gP4Orch->getAclTableManager()->getAclTable(table_name);
+  if (acl_table != nullptr) {
+    // Check if there is SET_VRF SAI action in the table
+    bool set_vrf_action_found = false;
+    for (const auto& action_field : acl_table->rule_action_field_lookup) {
+      const std::vector<SaiActionWithParam>& sai_actions = action_field.second;
+      for (const auto& sai_action : sai_actions) {
+        if (!set_vrf_action_found &&
+            sai_action.action == SAI_ACL_ENTRY_ATTR_ACTION_SET_VRF) {
+          set_vrf_action_found = true;
+        }
+      }
+      if (set_vrf_action_found) break;
+    }
+    if (!set_vrf_action_found) return ReturnCode();
+
+    // Check if there are match_IP SAI fields in the table
+    bool ipv6_match_found[2] = {false, false};
+    for (const auto& match_field :
+         acl_table->composite_sai_match_fields_lookup) {
+      const std::vector<SaiMatchField>& sai_matchs = match_field.second;
+      for (const auto& sai_match : sai_matchs) {
+        if (sai_match.entry_attr == SAI_ACL_ENTRY_ATTR_FIELD_DST_IPV6_WORD3)
+          ipv6_match_found[0] = true;
+        if (sai_match.entry_attr == SAI_ACL_ENTRY_ATTR_FIELD_DST_IPV6_WORD2)
+          ipv6_match_found[1] = true;
+      }
+      if (ipv6_match_found[0] && ipv6_match_found[1]) break;
+    }
+    if (!ipv6_match_found[0] || !ipv6_match_found[1]) return ReturnCode();
+  }
+
   // Return if the default rule already created.
-  if (m_defaultVrfOverridePreingressRuleCreated[table_name]) {
+  if (m_defaultVrfOverridePreingressRuleCreated) {
     SWSS_LOG_NOTICE(
         "Default ACL rule in PRE_INGRESS table %s has already suceeded to "
         "create.",
@@ -2098,8 +2131,6 @@ ReturnCode AclRuleManager::addDefaultAclRuleInPreIngressTable(
   }
 
   const std::string cLoopbackAlias = "Loopback0";
-  const auto* acl_table =
-      gP4Orch->getAclTableManager()->getAclTable(table_name);
   if (acl_table == nullptr) {
     LOG_ERROR_AND_RETURN(ReturnCode(StatusCode::SWSS_RC_NOT_FOUND)
                          << "ACL table " << QuotedVar(table_name)
@@ -2170,7 +2201,7 @@ ReturnCode AclRuleManager::addDefaultAclRuleInPreIngressTable(
   SWSS_LOG_NOTICE(
       "Suceeded to create default ACL rule in PRE_INGRESS table %s : %s",
       table_name.c_str(), sai_serialize_object_id(acl_entry_oid).c_str());
-      m_defaultVrfOverridePreingressRuleCreated[table_name] = true;
+  m_defaultVrfOverridePreingressRuleCreated = true;
   return ReturnCode();
 }
 

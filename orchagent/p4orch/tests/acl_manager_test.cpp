@@ -653,6 +653,13 @@ P4AclTableDefinitionAppDbEntry getDefaultAclTableDefAppDbEntry()
         {nlohmann::json::parse(BuildMatchFieldJsonStrKindSaiField(P4_MATCH_SRC_IPV6_WORD3, P4_FORMAT_IPV6, 32)),
          nlohmann::json::parse(BuildMatchFieldJsonStrKindSaiField(P4_MATCH_SRC_IPV6_WORD2, P4_FORMAT_IPV6, 32))},
         P4_FORMAT_IPV6, 64);
+    app_db_entry.match_field_lookup["dst_ipv6_64bit"] =
+        BuildMatchFieldJsonStrKindComposite(
+            {nlohmann::json::parse(BuildMatchFieldJsonStrKindSaiField(
+                 P4_MATCH_DST_IPV6_WORD3, P4_FORMAT_IPV6, 32)),
+             nlohmann::json::parse(BuildMatchFieldJsonStrKindSaiField(
+                 P4_MATCH_DST_IPV6_WORD2, P4_FORMAT_IPV6, 32))},
+            P4_FORMAT_IPV6, 64);
     app_db_entry.match_field_lookup["arp_tpa"] = BuildMatchFieldJsonStrKindComposite(
         {nlohmann::json::parse(BuildMatchFieldJsonStrKindUdf("SAI_UDF_BASE_L3", 24, P4_FORMAT_HEX_STRING, 16)),
          nlohmann::json::parse(BuildMatchFieldJsonStrKindUdf("SAI_UDF_BASE_L3", 26, P4_FORMAT_HEX_STRING, 16))},
@@ -985,6 +992,7 @@ class AclManagerTest : public ::testing::Test
         gP4Orch = new P4Orch(gAppDb, p4_tables, gVrfOrch, copp_orch_);
         acl_table_manager_ = gP4Orch->getAclTableManager();
         acl_rule_manager_ = gP4Orch->getAclRuleManager();
+        acl_rule_manager_->m_defaultVrfOverridePreingressRuleCreated = false;
         p4_oid_mapper_ = acl_table_manager_->m_p4OidMapper;
         gMockResponsePublisher = std::make_unique<MockResponsePublisher>();
     }
