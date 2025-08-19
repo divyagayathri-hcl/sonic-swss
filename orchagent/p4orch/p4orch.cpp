@@ -25,10 +25,6 @@
 #include "timer.h"
 #include "timestamp.h"
 
-extern bool gSwssRecord;
-extern ofstream gRecordOfs;
-extern bool gLogRotate;
-
 extern PortsOrch *gPortsOrch;
 #define P4_ACL_COUNTERS_STATS_POLL_TIMER_NAME "P4_ACL_COUNTERS_STATS_POLL_TIMER"
 #define P4_EXT_COUNTERS_STATS_POLL_TIMER_NAME "P4_EXT_COUNTERS_STATS_POLL_TIMER"
