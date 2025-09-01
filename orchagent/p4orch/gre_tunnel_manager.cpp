@@ -545,10 +545,16 @@ std::string GreTunnelManager::verifyStateAsicDb(const P4GreTunnelEntry *gre_tunn
 
     // Verify Tunnel ASIC DB attributes
     std::vector<sai_attribute_t> attrs = getSaiAttrs(*gre_tunnel_entry);
+<<<<<<< HEAD
     std::vector<swss::FieldValueTuple> exp =
         saimeta::SaiAttributeList::serialize_attr_list(
             SAI_OBJECT_TYPE_TUNNEL, (uint32_t)attrs.size(), attrs.data(),
             /*countOnly=*/false);
+=======
+    std::vector<swss::FieldValueTuple> exp = saimeta::SaiAttributeList::serialize_attr_list(
+          SAI_OBJECT_TYPE_TUNNEL, (uint32_t)attrs.size(), attrs.data(),
+          /*countOnly=*/false);
+>>>>>>> a4bac184 ([P4Orch] Fix non-OID bulker ordering and introduce temporary tunnel RIF workaround using 'gUnderlayIfId'.)
     std::string key = sai_serialize_object_type(SAI_OBJECT_TYPE_TUNNEL) + ":" +
                       sai_serialize_object_id(gre_tunnel_entry->tunnel_oid);
     std::vector<swss::FieldValueTuple> values;
