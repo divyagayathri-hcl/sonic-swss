@@ -8,6 +8,7 @@
 #include "mock_response_publisher.h"
 #include "mock_sai_hostif.h"
 #include "mock_sai_ipmc.h"
+#include "mock_sai_ipmc_group.h"
 #include "mock_sai_neighbor.h"
 #include "mock_sai_next_hop.h"
 #include "mock_sai_route.h"
@@ -25,6 +26,7 @@ extern swss::DBConnector* gAppDb;
 extern sai_hostif_api_t* sai_hostif_api;
 extern sai_switch_api_t* sai_switch_api;
 extern sai_ipmc_api_t* sai_ipmc_api;
+extern sai_ipmc_group_api_t* sai_ipmc_group_api;
 extern sai_router_interface_api_t* sai_router_intfs_api;
 extern sai_neighbor_api_t* sai_neighbor_api;
 extern sai_next_hop_api_t* sai_next_hop_api;
@@ -78,6 +80,17 @@ class P4OrchTest : public ::testing::Test {
     sai_route_api->remove_route_entries = remove_route_entries;
     sai_route_api->set_route_entries_attribute = set_route_entries_attribute;
     sai_route_api->get_route_entries_attribute = get_route_entries_attribute;
+    mock_sai_ipmc_group = &mock_sai_ipmc_group_;
+    sai_ipmc_group_api->create_ipmc_group = mock_create_ipmc_group;
+    sai_ipmc_group_api->remove_ipmc_group = mock_remove_ipmc_group;
+    sai_ipmc_group_api->create_ipmc_group_member =
+        mock_create_ipmc_group_member;
+    sai_ipmc_group_api->remove_ipmc_group_member =
+        mock_remove_ipmc_group_member;
+    sai_ipmc_group_api->set_ipmc_group_member_attribute =
+        mock_set_ipmc_group_member_attribute;
+    sai_ipmc_group_api->get_ipmc_group_member_attribute =
+        mock_get_ipmc_group_member_attribute;
     mock_sai_ipmc = &mock_sai_ipmc_;
     sai_ipmc_api->create_ipmc_entry = mock_create_ipmc_entry;
     sai_ipmc_api->remove_ipmc_entry = mock_remove_ipmc_entry;
@@ -118,6 +131,7 @@ class P4OrchTest : public ::testing::Test {
   NiceMock<MockSaiNeighbor> mock_sai_neighbor_;
   NiceMock<MockSaiNextHop> mock_sai_next_hop_;
   NiceMock<MockSaiRoute> mock_sai_route_;
+  NiceMock<MockSaiIpmcGroup> mock_sai_ipmc_group_;
   NiceMock<MockSaiIpmc> mock_sai_ipmc_;
   NiceMock<MockSaiRpfGroup> mock_sai_rpf_group_;
   CoppOrch* copp_orch_;
