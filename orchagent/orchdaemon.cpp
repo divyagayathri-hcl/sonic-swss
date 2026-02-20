@@ -78,6 +78,9 @@ event_handle_t g_events_handle;
 #define DEFAULT_MAX_BULK_SIZE 1000
 size_t gMaxBulkSize = DEFAULT_MAX_BULK_SIZE;
 
+static const std::string p4OrchZmqServerEp = "ipc:///zmq_swss/p4orch_zmq_swss_ep";
+swss::ZmqServer* p4OrchZmqServer = nullptr;
+
 OrchDaemon::OrchDaemon(DBConnector *applDb, DBConnector *configDb, DBConnector *stateDb, DBConnector *chassisAppDb, ZmqServer *zmqServer) :
         m_applDb(applDb),
         m_configDb(configDb),
@@ -827,6 +830,11 @@ bool OrchDaemon::init()
     m_p4OrchZmqServer = new swss::ZmqServer(m_p4OrchZmqServerEp, "", false, true);
     gP4Orch = new P4Orch(m_applDb, p4rt_tables, m_p4OrchZmqServer, vrf_orch, gCoppOrch);
     m_orchList.push_back(gP4Orch);
+
+    if (p4OrchZmqServer)
+    {
+        p4OrchZmqServer->bind();
+    }
 
     TableConnector confDbTwampTable(m_configDb, CFG_TWAMP_SESSION_TABLE_NAME);
     TableConnector stateDbTwampTable(m_stateDb, STATE_TWAMP_SESSION_TABLE_NAME);

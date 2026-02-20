@@ -7,6 +7,8 @@ INGRESS_STAGE = "SAI_ACL_STAGE_INGRESS"
 EGRESS_STAGE = "SAI_ACL_STAGE_EGRESS"
 PRE_INGRESS_STAGE = "SAI_ACL_STAGE_PRE_INGRESS"
 
+APP_DB_TBL_NAME = swsscommon.APP_P4RT_TABLE_NAME
+
 class P4RtAclTableDefinitionWrapper(util.DBInterface):
     """Interface to interact with APP DB and ASIC DB tables for P4RT ACL table definition object."""
 
@@ -71,7 +73,6 @@ class P4RtAclRuleWrapper(util.DBInterface):
     SAI_ATTR_ACTION_SET_USER_TRAP_ID = "SAI_ACL_ENTRY_ATTR_ACTION_SET_USER_TRAP_ID"
 
     # table name in APP_DB and attribute fields
-    APP_DB_TBL_NAME = swsscommon.APP_P4RT_TABLE_NAME
     ACTION = "action"
     METER_CIR = "meter/cir"
     METER_CBURST = "meter/cburst"
