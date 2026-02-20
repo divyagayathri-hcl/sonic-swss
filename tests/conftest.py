@@ -377,8 +377,10 @@ class DockerVirtualSwitch:
                     self.servers.append(server)
 
                 self.mount = f"/var/run/redis-vs/{ctn_sw_name}"
+                self.zmq_mount = f"/zmq/{ctn_sw_name}"
             else:
                 self.mount = "/var/run/redis-vs/{}".format(name)
+                self.zmq_mount = "/zmq/{}".format(name)
 
             self.net_cleanup()
 
@@ -413,12 +415,19 @@ class DockerVirtualSwitch:
             # mount redis to base to unique directory
             self.mount = f"/var/run/redis-vs/{self.ctn_sw.name}"
             ensure_system(f"mkdir -p {self.mount}")
+            self.zmq_mount = f"/zmq/p4orch/"
+            # self.zmq_mount = f"/zmq/{self.ctn_sw.name}"
+            ensure_system(f"mkdir -p {self.zmq_mount}")
+            print(f"Container Name: {self.ctn_sw.name}")
 
             kwargs = {}
             if newctnname:
                 kwargs["name"] = newctnname
                 self.dvsname = newctnname
-            vols = {self.mount: {"bind": "/var/run/redis", "mode": "rw"}}
+            vols = {
+                self.mount: {"bind": "/var/run/redis", "mode": "rw"},
+                self.zmq_mount: {"bind": "/zmq_swss", "mode": "rw"},
+            }
             if ctnmounts:
                 for k, v in ctnmounts.items():
                     vols[k] = v
@@ -438,6 +447,17 @@ class DockerVirtualSwitch:
         self.pid = int(output)
         self.redis_sock = os.path.join(self.mount, "redis.sock")
         self.redis_chassis_sock = os.path.join(self.mount, "redis_chassis.sock")
+        self.p4orch_zmq_sock = os.path.join(self.zmq_mount, "p4orch_zmq_swss_ep")
+
+        # To print dvs.p4orch_zmq_sock
+        print(f"ZMQ Socket Path: {self.p4orch_zmq_sock}")
+        if os.path.exists(self.p4orch_zmq_sock):
+            print("dvs.p4orch_zmq_sock exists!")
+        else:
+            print("dvs.p4orch_zmq_sock is missing!")
+
+        ensure_system(f"rm -rf /var/run/redis/redis.sock")
+        ensure_system(f"ln -sf {self.redis_sock} /var/run/redis/redis.sock")
 
         self.reset_dbs()
 
@@ -1972,7 +1992,14 @@ def dvs(request, manage_dvs) -> DockerVirtualSwitch:
     name = request.config.getoption("--dvsname")
     log_path = name if name else request.module.__name__
 
-    return manage_dvs(log_path, dvs_env)
+    # return manage_dvs(log_path, dvs_env)
+    dvs_instance = manage_dvs(log_path, dvs_env)
+    # DEBUG: Check health before returning to the test
+    os.system(f"echo 'CONFTEST: Validating health for {log_path}'")
+    os.system("[ -S /var/run/redis/redis.sock ] && echo 'CONFTEST: Redis socket OK' || echo 'CONFTEST: Redis socket MISSING'")
+    os.system("sudo -u redis redis-cli -s /var/run/redis/redis.sock PING || echo 'CONFTEST: Redis NOT responding to PING'")
+
+    return dvs_instance
 
 @pytest.fixture(scope="module")
 def vst(request):
