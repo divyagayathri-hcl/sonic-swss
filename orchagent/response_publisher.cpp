@@ -101,32 +101,33 @@ void ResponsePublisher::publish(const std::string &table, const std::string &key
     // Add error message as the first field-value-pair.
     swss::FieldValueTuple err_str("err_str", PrependedComponent(status) + status.message());
     intent_attrs_copy.insert(intent_attrs_copy.begin(), err_str);
-  std::string response_channel = "APPL_DB_" + table + "_RESPONSE_CHANNEL";
+    std::string response_channel = "APPL_DB_" + table + "_RESPONSE_CHANNEL";
 
-  if (m_zmqServer != nullptr) {
-    auto intent_attrs_zmq_copy = intent_attrs;
-    // Add status code and error message as the first field-value-pair.
-    swss::FieldValueTuple fvs(status.codeStr(),
-                              PrependedComponent(status) + status.message());
-    intent_attrs_zmq_copy.insert(intent_attrs_zmq_copy.begin(), fvs);
-    // Queue the response.
-    responses[table].push_back(
-        swss::KeyOpFieldsValuesTuple{key, SET_COMMAND, intent_attrs_zmq_copy});
-  } else {
-    // Sends the response to the notification channel.
-    swss::NotificationProducer notificationProducer{
-        m_ntf_pipe.get(), response_channel, m_buffered};
-    notificationProducer.send(status.codeStr(), key, intent_attrs_copy);
-  }
+    if (m_zmqServer != nullptr) {
+        auto intent_attrs_zmq_copy = intent_attrs;
+        // Add status code and error message as the first field-value-pair.
+        swss::FieldValueTuple fvs(status.codeStr(),
+                                PrependedComponent(status) + status.message());
+        intent_attrs_zmq_copy.insert(intent_attrs_zmq_copy.begin(), fvs);
+        // Queue the response.
+        responses[table].push_back(
+            swss::KeyOpFieldsValuesTuple{key, SET_COMMAND,
+                intent_attrs_zmq_copy});
+    } else {
+        // Sends the response to the notification channel.
+        swss::NotificationProducer notificationProducer{
+            m_ntf_pipe.get(), response_channel, m_buffered};
+        notificationProducer.send(status.codeStr(), key, intent_attrs_copy);
+    }
 
     RecordResponse(response_channel, key, intent_attrs_copy, status.codeStr());
 
     // Write to the DB only if:
     // 1) A write operation is being performed and state attributes are specified.
     // 2) A successful delete operation.
-    if ((intent_attrs.size() && state_attrs.size()) || (status.ok() && !intent_attrs.size()))
-    {
-        writeToDB(table, key, state_attrs, intent_attrs.size() ? SET_COMMAND : DEL_COMMAND, replace);
+    if ((intent_attrs.size() && state_attrs.size()) ||
+        (status.ok() && !intent_attrs.size())) {
+             writeToDB(table, key, state_attrs, intent_attrs.size() ? SET_COMMAND : DEL_COMMAND, replace);
     }
 }
 
@@ -279,3 +280,4 @@ void ResponsePublisher::dbUpdateThread()
         }
     }
 }
+

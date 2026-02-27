@@ -30,3 +30,4 @@ TEST(ResponsePublisher, TestPublishBuffered)
     ASSERT_TRUE(stateTable.hget("SOME_KEY", "field", value));
     ASSERT_EQ(value, "value");
 }
+
