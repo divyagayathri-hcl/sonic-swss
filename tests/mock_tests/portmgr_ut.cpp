@@ -31,6 +31,7 @@ namespace portmgr_ut
             ::testing_db::reset();
             vector<string> cfg_port_tables = {
                 CFG_PORT_TABLE_NAME,
+                CFG_SEND_TO_INGRESS_PORT_TABLE_NAME,
             };
             m_portMgr.reset(new PortMgr(m_config_db.get(), m_app_db.get(), m_state_db.get(), cfg_port_tables));
         }
@@ -200,5 +201,22 @@ namespace portmgr_ut
         value_opt = swss::fvsGetValue(values, "pt_timestamp_template", true);
         ASSERT_TRUE(value_opt);
         ASSERT_EQ("template2", value_opt.get());
+    }
+
+    TEST_F(PortMgrTest, SendToIngressTable)
+    {
+        Table app_table(m_app_db.get(), APP_SEND_TO_INGRESS_PORT_TABLE_NAME);
+        Table cfg_table(m_config_db.get(), CFG_SEND_TO_INGRESS_PORT_TABLE_NAME);
+
+        cfg_table.set(SEND_TO_INGRESS_PORT_NAME, {
+            {"NULL", "NULL"}
+        });
+
+        mockCallArgs.clear();
+        m_portMgr->addExistingData(&cfg_table);
+        m_portMgr->doTask();
+        ASSERT_TRUE(mockCallArgs.empty());
+        std::vector<FieldValueTuple> values;
+        EXPECT_TRUE(app_table.get(SEND_TO_INGRESS_PORT_NAME, values));
     }
 }

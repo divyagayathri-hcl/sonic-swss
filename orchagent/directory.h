@@ -41,30 +41,46 @@ public:
         return static_cast<U>(m_values.at(type_name));
     }
 
-    class iterator : public std::iterator<std::input_iterator_tag, B>
+class iterator
+{
+public:
+    // Required iterator traits (replacement for std::iterator)
+    using iterator_category = std::input_iterator_tag;
+    using value_type        = B;
+    using difference_type   = std::ptrdiff_t;
+    using pointer           = B*;
+    using reference         = B&;
+
+    explicit iterator(
+        const typename std::unordered_map<std::string, B>::iterator& it)
+        : it(it)
     {
-    public:
-        explicit iterator(const typename std::unordered_map<std::string, B>::iterator& it) : it(it) {}
+    }
 
-        B& operator*() const
-        {
-            return it->second;
-        }
+    reference operator*() const
+    {
+        return it->second;
+    }
 
-        bool operator!=(iterator other) const
-        {
-            return it != other.it;
-        }
+    pointer operator->() const
+    {
+        return &it->second;
+    }
 
-        iterator& operator++()
-        {
-            ++it;
-            return *this;
-        }
+    bool operator!=(const iterator& other) const
+    {
+        return it != other.it;
+    }
 
-    private:
-        typename std::unordered_map<std::string, B>::iterator it;
-    };
+    iterator& operator++()
+    {
+        ++it;
+        return *this;
+    }
+
+private:
+    typename std::unordered_map<std::string, B>::iterator it;
+};
 
     iterator begin()
     {
