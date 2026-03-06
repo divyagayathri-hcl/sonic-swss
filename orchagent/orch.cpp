@@ -319,6 +319,12 @@ void ConsumerBase::addToSync(const KeyOpFieldsValuesTuple &entry, bool onRetry)
         }
     }
 
+    if (m_orderedQueue)
+    {
+        m_toSyncQueue.push_back(entry);
+        return;
+    }
+
     /*
     * m_toSync is a multimap which will allow one key with multiple values,
     * Also, the order of the key-value pairs whose keys compare equivalent
@@ -476,6 +482,19 @@ string ConsumerBase::dumpTuple(const KeyOpFieldsValuesTuple &tuple)
 
 void ConsumerBase::dumpPendingTasks(vector<string> &ts)
 {
+    if (m_orderedQueue)
+    {
+        for (auto &tm : m_toSyncQueue)
+        {
+            KeyOpFieldsValuesTuple& tuple = tm;
+
+            string s = dumpTuple(tuple);
+
+            ts.push_back(s);
+        }
+        return;
+    }
+
     for (auto &tm : m_toSync)
     {
         KeyOpFieldsValuesTuple& tuple = tm.second;
@@ -555,7 +574,7 @@ void Executor::processAnyTask(AnyTask&& task)
 
 void Consumer::drain()
 {
-    if (!m_toSync.empty())
+    if (!m_toSync.empty() || !m_toSyncQueue.empty())
         ((Orch *)m_orch)->doTask((Consumer&)*this);
 }
 
@@ -1183,3 +1202,16 @@ void Orch2::doTask(Consumer &consumer)
         }
     }
 }
+
+void Orch::setOrderedQueueForAllConsumers(bool orderedQueue)
+{
+    for (auto executor : m_consumerMap)
+    {
+        auto *consumer = dynamic_cast<ConsumerBase*>(executor.second.get());
+        if (consumer != nullptr)
+        {
+            consumer->setOrderedQueue(orderedQueue);
+        }
+    }
+}
+
