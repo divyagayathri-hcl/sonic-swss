@@ -1,25 +1,23 @@
 """ Defines common P4RT utility functions."""
 from swsscommon import swsscommon
 
-import os
 import time
 import json
-import ctypes
 
 def _set_up_appl_db(dvs):
     """ Initializes application database connector."""
-    # return swsscommon.DBConnector(swsscommon.APPL_DB, dvs.redis_sock, 0)
-    return swsscommon.DBConnector(int(swsscommon.APPL_DB), dvs.redis_sock, 0)
+    return swsscommon.DBConnector(swsscommon.APPL_DB, dvs.redis_sock, 0)
+    # return swsscommon.DBConnector(int(swsscommon.APPL_DB), dvs.redis_sock, 0)
 
 def _set_up_asic_db(dvs):
     """ Initializes ASIC database connector."""
-    # return swsscommon.DBConnector(swsscommon.ASIC_DB, dvs.redis_sock, 0)
-    return swsscommon.DBConnector(int(swsscommon.ASIC_DB), dvs.redis_sock, 0)
+    return swsscommon.DBConnector(swsscommon.ASIC_DB, dvs.redis_sock, 0)
+    # return swsscommon.DBConnector(int(swsscommon.ASIC_DB), dvs.redis_sock, 0)
 
 def _set_up_appl_state_db(dvs):
     """ Initializes APPL STATE database connector."""
-    # return swsscommon.DBConnector(swsscommon.APPL_STATE_DB, dvs.redis_sock, 0)
-    return swsscommon.DBConnector(6, dvs.redis_sock, 0)
+    return swsscommon.DBConnector(swsscommon.APPL_STATE_DB, dvs.redis_sock, 0)
+    # return swsscommon.DBConnector(6, dvs.redis_sock, 0)
 
 def get_keys(db, tbl_name):
     """ Retrieves keys from given database and table."""
@@ -126,7 +124,8 @@ class DBInterface(object):
         self.appl_db = _set_up_appl_db(dvs)
         self.asic_db = _set_up_asic_db(dvs)
         self.appl_state_db = _set_up_appl_state_db(dvs)
-        self.zmq = swsscommon.ZmqClient("ipc://" + dvs.p4orch_zmq_sock, ctypes.c_uint32(5000).value)
+        wait_time_ms = 20000
+        self.zmq = swsscommon.ZmqClient("ipc://" + dvs.p4orch_zmq_sock, wait_time_ms)
         self.zmq_db = swsscommon.DBConnector("APPL_DB", 0)
         self.zmq_tbl = swsscommon.ZmqProducerStateTable(
             self.zmq_db, self.APP_DB_TBL_NAME, self.zmq)

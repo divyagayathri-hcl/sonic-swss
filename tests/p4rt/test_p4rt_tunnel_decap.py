@@ -38,8 +38,6 @@ class TestP4RTunnelDecap(object):
         self._vrf_obj = test_vrf.TestVrf()
 
         self._p4rt_tunnel_decap_wrapper.set_up_databases(dvs)
-        self._response_consumer = swsscommon.NotificationConsumer(
-            self._p4rt_tunnel_decap_wrapper.appl_db, "APPL_DB_" + swsscommon.APP_P4RT_TABLE_NAME + "_RESPONSE_CHANNEL")
 
     def _set_vrf(self, dvs):
         # Create VRF.
@@ -76,8 +74,8 @@ class TestP4RTunnelDecap(object):
         tunnel_decap_group_key = self._p4rt_tunnel_decap_wrapper.generate_app_db_key(src_ipv6, dst_ipv6)
         self._p4rt_tunnel_decap_wrapper.set_app_db_entry(
             tunnel_decap_group_key, attr_list_in_app_db)
-        util.verify_response(
-            self._response_consumer, tunnel_decap_group_key, attr_list_in_app_db, "SWSS_RC_SUCCESS")
+        self._p4rt_tunnel_decap_wrapper.verify_response(
+            tunnel_decap_group_key, attr_list_in_app_db, "SWSS_RC_SUCCESS")
         # Query application database for tunnel decap group entries
         appl_tunnel_decap_group_entries = util.get_keys(
             self._p4rt_tunnel_decap_wrapper.appl_db,
@@ -130,8 +128,8 @@ class TestP4RTunnelDecap(object):
         # 2. Delete the tunnel decap group.
         self._p4rt_tunnel_decap_wrapper.remove_app_db_entry(
             tunnel_decap_group_key)
-        util.verify_response(
-            self._response_consumer, tunnel_decap_group_key, [], "SWSS_RC_SUCCESS")
+        self._p4rt_tunnel_decap_wrapper.verify_response(
+            tunnel_decap_group_key, [], "SWSS_RC_SUCCESS")
 
         # Query application database for tunnel decap group entries
         appl_tunnel_decap_group_entries = util.get_keys(
@@ -172,21 +170,21 @@ class TestP4RTunnelDecap(object):
         tunnel_decap_group_key = self._p4rt_tunnel_decap_wrapper.generate_app_db_key(src_ipv6, dst_ipv6)
         self._p4rt_tunnel_decap_wrapper.set_app_db_entry(
             tunnel_decap_group_key, attr_list_in_app_db)
-        util.verify_response(
-            self._response_consumer, tunnel_decap_group_key, attr_list_in_app_db, "SWSS_RC_SUCCESS")
+        self._p4rt_tunnel_decap_wrapper.verify_response(
+            tunnel_decap_group_key, attr_list_in_app_db, "SWSS_RC_SUCCESS")
 
         # Update tunnel decap group fails
         self._p4rt_tunnel_decap_wrapper.set_app_db_entry(
             tunnel_decap_group_key, attr_list_in_app_db)
-        util.verify_response(
-            self._response_consumer, tunnel_decap_group_key, attr_list_in_app_db, "SWSS_RC_UNIMPLEMENTED",
+        self._p4rt_tunnel_decap_wrapper.verify_response(
+            tunnel_decap_group_key, attr_list_in_app_db, "SWSS_RC_UNIMPLEMENTED",
             "[OrchAgent] SWSS_RC_UNIMPLEMENTED")
 
         # Delete the tunnel decap group.
         self._p4rt_tunnel_decap_wrapper.remove_app_db_entry(
             tunnel_decap_group_key)
-        util.verify_response(
-            self._response_consumer, tunnel_decap_group_key, [], "SWSS_RC_SUCCESS")
+        self._p4rt_tunnel_decap_wrapper.verify_response(
+            tunnel_decap_group_key, [], "SWSS_RC_SUCCESS")
 
     def test_TunnelDecapGroupDeleteBeforeAddFails(self, dvs, testlog):
         # Initialize database connectors
@@ -200,8 +198,8 @@ class TestP4RTunnelDecap(object):
         # Remove tunnel decap group fails
         self._p4rt_tunnel_decap_wrapper.remove_app_db_entry(
             tunnel_decap_group_key)
-        util.verify_response(
-            self._response_consumer, tunnel_decap_group_key, [], "SWSS_RC_NOT_FOUND",
+        self._p4rt_tunnel_decap_wrapper.verify_response(
+            tunnel_decap_group_key, [], "SWSS_RC_NOT_FOUND",
             "[OrchAgent] Ipv6 tunnel termination table entry with key "
             "'dst_ipv6_ip=2001:db8:3c4d:15:::dst_ipv6_mask=ffff:ffff:ffff:ffff:::"
             "src_ipv6_ip=3001:db8:3c4d:11:::src_ipv6_mask=ffff:ffff:ffff:ffff::' "

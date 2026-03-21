@@ -34,6 +34,8 @@ class TestP4RTL3(object):
         self._vrf_obj.vrf_remove(dvs, self.vrf_id, self.vrf_state)
 
     def test_IPv4RouteWithNexthopAddUpdateDeletePass(self, dvs, testlog):
+        wait_time_ms = 20000
+        self.zmq = swsscommon.ZmqClient("ipc://" + dvs.p4orch_zmq_sock, wait_time_ms)
         # Initialize L3 objects and database connectors.
         self._set_up(dvs)
         self._set_vrf(dvs)
@@ -1973,13 +1975,13 @@ class TestP4RTL3(object):
 
         # Cleanup
         self._p4rt_nexthop_obj.remove_app_db_entry(nexthop_key)
-        util.verify_response(
-            self.response_consumer, nexthop_key, [], "SWSS_RC_SUCCESS")
+        self._p4rt_nexthop_obj.verify_response(
+            nexthop_key, [], "SWSS_RC_SUCCESS")
         self._p4rt_neighbor_obj.remove_app_db_entry(neighbor_key)
-        util.verify_response(
-            self.response_consumer, neighbor_key, [], "SWSS_RC_SUCCESS")
+        self._p4rt_neighbor_obj.verify_response(
+            neighbor_key, [], "SWSS_RC_SUCCESS")
         self._p4rt_router_intf_obj.remove_app_db_entry(router_intf_key)
-        util.verify_response(
-            self.response_consumer, router_intf_key, [], "SWSS_RC_SUCCESS")
+        self._p4rt_router_intf_obj.verify_response(
+            router_intf_key, [], "SWSS_RC_SUCCESS")
 
         self._clean_vrf(dvs)
