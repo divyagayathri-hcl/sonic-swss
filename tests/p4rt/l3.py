@@ -167,12 +167,9 @@ class P4RtGreTunnelWrapper(util.DBInterface):
         return len(entries)
 
     def get_original_appl_state_db_entries_count(self):
-        return len(
-            self._original_entries[
-                "%s:%s"
-                % (self.appl_state_db, (self.APP_DB_TBL_NAME + ":" + self.TBL_NAME))
-            ]
-        )
+        key = "%s:%s" % (self.appl_state_db, (self.APP_DB_TBL_NAME + ":" + self.TBL_NAME))
+        entries = self._original_entries.get(key, [])
+        return len(entries)
 
     def get_original_asic_db_entries_count(self):
         return len(
@@ -365,12 +362,9 @@ class P4RtNextHopWrapper(util.DBInterface):
         return len(entries)
 
     def get_original_appl_state_db_entries_count(self):
-        return len(
-            self._original_entries[
-                "%s:%s"
-                % (self.appl_state_db, (self.APP_DB_TBL_NAME + ":" + self.TBL_NAME))
-            ]
-        )
+        key = "%s:%s" % (self.appl_state_db, (self.APP_DB_TBL_NAME + ":" + self.TBL_NAME))
+        entries = self._original_entries.get(key, [])
+        return len(entries)
 
     def get_original_asic_db_entries_count(self):
         return len(
@@ -466,12 +460,9 @@ class P4RtWcmpGroupWrapper(util.DBInterface):
         return len(entries)
 
     def get_original_appl_state_db_entries_count(self):
-        return len(
-            self._original_entries[
-                "%s:%s"
-                % (self.appl_state_db, (self.APP_DB_TBL_NAME + ":" + self.TBL_NAME))
-            ]
-        )
+        key = "%s:%s" % (self.appl_state_db, (self.APP_DB_TBL_NAME + ":" + self.TBL_NAME))
+        entries = self._original_entries.get(key, [])
+        return len(entries)
 
     def get_original_asic_db_group_entries_count(self):
         return len(
@@ -591,12 +582,9 @@ class P4RtRouteWrapper(util.DBInterface):
         return len(entries)
 
     def get_original_appl_state_db_entries_count(self):
-        return len(
-            self._original_entries[
-                "%s:%s"
-                % (self.appl_state_db, (self.APP_DB_TBL_NAME + ":" + self.TBL_NAME))
-            ]
-        )
+        key = "%s:%s" % (self.appl_state_db, (self.APP_DB_TBL_NAME + ":" + self.TBL_NAME))
+        entries = self._original_entries.get(key, [])
+        return len(entries)
 
     def get_original_asic_db_entries_count(self):
         return len(
