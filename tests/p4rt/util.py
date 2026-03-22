@@ -7,17 +7,14 @@ import json
 def _set_up_appl_db(dvs):
     """ Initializes application database connector."""
     return swsscommon.DBConnector(swsscommon.APPL_DB, dvs.redis_sock, 0)
-    # return swsscommon.DBConnector(int(swsscommon.APPL_DB), dvs.redis_sock, 0)
 
 def _set_up_asic_db(dvs):
     """ Initializes ASIC database connector."""
     return swsscommon.DBConnector(swsscommon.ASIC_DB, dvs.redis_sock, 0)
-    # return swsscommon.DBConnector(int(swsscommon.ASIC_DB), dvs.redis_sock, 0)
 
 def _set_up_appl_state_db(dvs):
     """ Initializes APPL STATE database connector."""
     return swsscommon.DBConnector(swsscommon.APPL_STATE_DB, dvs.redis_sock, 0)
-    # return swsscommon.DBConnector(6, dvs.redis_sock, 0)
 
 def get_keys(db, tbl_name):
     """ Retrieves keys from given database and table."""

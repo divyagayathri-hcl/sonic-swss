@@ -19,15 +19,11 @@ class TestP4RTL3MulticastRouterInterface(object):
     self._p4rt_l3_multicast_router_intf.set_up_databases(dvs)
 
     self.p4rt_notifier = swsscommon.NotificationProducer(
-      self._p4rt_l3_multicast_router_intf.appl_db,
-      APP_P4RT_CHANNEL_NAME)
-    self.response_consumer = swsscommon.NotificationConsumer(
-      self._p4rt_l3_multicast_router_intf.appl_db, "APPL_DB_" +
-      swsscommon.APP_P4RT_TABLE_NAME + "_RESPONSE_CHANNEL"
-    )
+        self._p4rt_l3_multicast_router_intf.appl_db,
+        APP_P4RT_CHANNEL_NAME)
     self.appl_db_table = (
         self._p4rt_l3_multicast_router_intf.APP_DB_TBL_NAME + ":" +
-            self._p4rt_l3_multicast_router_intf.TBL_NAME)
+        self._p4rt_l3_multicast_router_intf.TBL_NAME)
     self.asic_db_table = self._p4rt_l3_multicast_router_intf.ASIC_DB_TBL_NAME
 
   def get_global_vrf_id(self):
@@ -60,8 +56,8 @@ class TestP4RTL3MulticastRouterInterface(object):
     mcast_router_intf_key, attr_list = (
         self._p4rt_l3_multicast_router_intf.create_router_interface(
             port_id=None, instance=None, src_mac=None))
-    util.verify_response(self.response_consumer, mcast_router_intf_key,
-                         attr_list, "SWSS_RC_SUCCESS")
+    self._p4rt_l3_multicast_router_intf.verify_response(mcast_router_intf_key,
+                                                        attr_list, "SWSS_RC_SUCCESS")
 
     # Check that APP DB has expected entry with expected values.
     mcast_rif_entries = util.get_keys(
@@ -119,8 +115,8 @@ class TestP4RTL3MulticastRouterInterface(object):
     mcast_router_intf_key, attr_list = (
         self._p4rt_l3_multicast_router_intf.create_router_interface(
             port_id=None, instance=None, src_mac=new_src_mac))
-    util.verify_response(self.response_consumer, mcast_router_intf_key,
-                         attr_list, "SWSS_RC_SUCCESS")
+    self._p4rt_l3_multicast_router_intf.verify_response(mcast_router_intf_key,
+                                                        attr_list, "SWSS_RC_SUCCESS")
 
     # Check that APP DB has expected entry with expected values.
     mcast_rif_entries = util.get_keys(
@@ -170,8 +166,8 @@ class TestP4RTL3MulticastRouterInterface(object):
     ####################################
     self._p4rt_l3_multicast_router_intf.remove_app_db_entry(
         mcast_router_intf_key)
-    util.verify_response(self.response_consumer, mcast_router_intf_key, [],
-                         "SWSS_RC_SUCCESS")
+    self._p4rt_l3_multicast_router_intf.verify_response(mcast_router_intf_key, [],
+                                                        "SWSS_RC_SUCCESS")
 
     # Check that entries are gone.
     mcast_rif_entries = util.get_keys(
@@ -206,8 +202,8 @@ class TestP4RTL3MulticastRouterInterface(object):
 
     self._p4rt_l3_multicast_router_intf.remove_app_db_entry(
         mcast_router_intf_key)
-    util.verify_response(
-        self.response_consumer, mcast_router_intf_key, [], "SWSS_RC_NOT_FOUND",
+    self._p4rt_l3_multicast_router_intf.verify_response(
+        mcast_router_intf_key, [], "SWSS_RC_NOT_FOUND",
         "[OrchAgent] Multicast router interface entry exists does not exist")
 
     # Check that entries remain unchanged.
@@ -239,14 +235,14 @@ class TestP4RTL3MulticastRouterInterface(object):
     mcast_router_intf_key_0, attr_list_0 = (
         self._p4rt_l3_multicast_router_intf.create_router_interface(
             port_id=None, instance="0x0", src_mac=None))
-    util.verify_response(self.response_consumer, mcast_router_intf_key_0,
-                         attr_list_0, "SWSS_RC_SUCCESS")
+    self._p4rt_l3_multicast_router_intf.verify_response(mcast_router_intf_key_0,
+                                                        attr_list_0, "SWSS_RC_SUCCESS")
 
     mcast_router_intf_key_1, attr_list_1 = (
         self._p4rt_l3_multicast_router_intf.create_router_interface(
             port_id=None, instance="0x1", src_mac=None))
-    util.verify_response(self.response_consumer, mcast_router_intf_key_1,
-                         attr_list_1, "SWSS_RC_SUCCESS")
+    self._p4rt_l3_multicast_router_intf.verify_response(mcast_router_intf_key_1,
+                                                        attr_list_1, "SWSS_RC_SUCCESS")
 
     # Check that APP DB has expected entry with expected values.
     mcast_rif_entries = util.get_keys(
@@ -309,8 +305,8 @@ class TestP4RTL3MulticastRouterInterface(object):
     ####################################
     self._p4rt_l3_multicast_router_intf.remove_app_db_entry(
         mcast_router_intf_key_0)
-    util.verify_response(self.response_consumer, mcast_router_intf_key_0, [],
-                         "SWSS_RC_SUCCESS")
+    self._p4rt_l3_multicast_router_intf.verify_response(mcast_router_intf_key_0, [],
+                                                        "SWSS_RC_SUCCESS")
 
     # Check that one APP DB entry has been removed.
     mcast_rif_entries = util.get_keys(
@@ -367,15 +363,12 @@ class TestP4RTL3MulticastGroup(object):
     self._p4rt_l3_multicast_group_intf.set_up_databases(dvs)
 
     self.p4rt_notifier = swsscommon.NotificationProducer(
-      self._p4rt_l3_multicast_group_intf.appl_db,
-      APP_P4RT_CHANNEL_NAME)
-    self.response_consumer = swsscommon.NotificationConsumer(
-      self._p4rt_l3_multicast_group_intf.appl_db, "APPL_DB_" +
-      swsscommon.APP_P4RT_TABLE_NAME + "_RESPONSE_CHANNEL")
+        self._p4rt_l3_multicast_group_intf.appl_db,
+        APP_P4RT_CHANNEL_NAME)
 
     self.appl_db_table = (
         self._p4rt_l3_multicast_group_intf.APP_DB_TBL_NAME + ":" +
-            self._p4rt_l3_multicast_group_intf.TBL_NAME)
+        self._p4rt_l3_multicast_group_intf.TBL_NAME)
     self.asic_db_group_table = (
         self._p4rt_l3_multicast_group_intf.ASIC_DB_GROUP_TBL_NAME)
     self.asic_db_group_member_table = (
@@ -425,8 +418,8 @@ class TestP4RTL3MulticastGroup(object):
     mcast_router_intf_key, attr_list = (
         self._p4rt_l3_multicast_router_intf.create_router_interface(
             port_id, instance, src_mac))
-    util.verify_response(self.response_consumer, mcast_router_intf_key,
-                         attr_list, "SWSS_RC_SUCCESS")
+    self._p4rt_l3_multicast_router_intf.verify_response(mcast_router_intf_key,
+                                                        attr_list, "SWSS_RC_SUCCESS")
     rif_oid = self.get_added_rif_oid(start_asic_db_rif_entries)
     return rif_oid
 
@@ -448,8 +441,8 @@ class TestP4RTL3MulticastGroup(object):
     mcast_group_key, attr_list = (
         self._p4rt_l3_multicast_group_intf.create_multicast_group_entry(
             group_id=group_id, replicas=replicas))
-    util.verify_response(self.response_consumer, mcast_group_key,
-                         attr_list, "SWSS_RC_SUCCESS")
+    self._p4rt_l3_multicast_group_intf.verify_response(mcast_group_key,
+                                                       attr_list, "SWSS_RC_SUCCESS")
 
     # Check that APP DB has expected entry with expected values.
     mcast_group_entries = util.get_keys(
@@ -562,8 +555,8 @@ class TestP4RTL3MulticastGroup(object):
     # Delete operation
     ####################################
     self._p4rt_l3_multicast_group_intf.remove_app_db_entry(mcast_group_key)
-    util.verify_response(self.response_consumer, mcast_group_key, [],
-                         "SWSS_RC_SUCCESS")
+    self._p4rt_l3_multicast_group_intf.verify_response(mcast_group_key, [],
+                                                       "SWSS_RC_SUCCESS")
 
     # Check that APP DB entry was removed.
     mcast_group_entries = util.get_keys(
@@ -632,8 +625,8 @@ class TestP4RTL3MulticastGroup(object):
     mcast_group_key_1, attr_list_1 = (
         self._p4rt_l3_multicast_group_intf.create_multicast_group_entry(
             replicas=[("Ethernet4", "0x0")]))
-    util.verify_response(self.response_consumer, mcast_group_key_1,
-                         attr_list_1, "SWSS_RC_SUCCESS")
+    self._p4rt_l3_multicast_group_intf.verify_response(mcast_group_key_1,
+                                                       attr_list_1, "SWSS_RC_SUCCESS")
 
     # Check that APP DB entry is still there.
     mcast_group_entries = util.get_keys(
@@ -696,8 +689,8 @@ class TestP4RTL3MulticastGroup(object):
             self._p4rt_l3_multicast_group_intf.DEFAULT_GROUP_ID))
 
     self._p4rt_l3_multicast_group_intf.remove_app_db_entry(mcast_group_key)
-    util.verify_response(
-        self.response_consumer, mcast_group_key, [], "SWSS_RC_NOT_FOUND",
+    self._p4rt_l3_multicast_group_intf.verify_response(
+        mcast_group_key, [], "SWSS_RC_NOT_FOUND",
         "[OrchAgent] Multicast group entry does not exist for group 0x1")
 
     # Check that entries remain unchanged.
@@ -736,8 +729,8 @@ class TestP4RTL3MulticastGroup(object):
     mcast_group_key, attr_list = (
         self._p4rt_l3_multicast_group_intf.create_multicast_group_entry(
             group_id=None, replicas=[("Ethernet8", "0x0")]))
-    util.verify_response(
-        self.response_consumer, mcast_group_key, attr_list,
+    self._p4rt_l3_multicast_group_intf.verify_response(
+        mcast_group_key, attr_list,
         "SWSS_RC_NOT_FOUND",
         ("[OrchAgent] Multicast group member '0x1:Ethernet8:0x0' "
          "does not have an associated RIF available yet"))
@@ -771,9 +764,6 @@ class TestP4RTL3MulticastRoute(object):
     self.p4rt_notifier = swsscommon.NotificationProducer(
       self._p4rt_l3_multicast_route.appl_db,
       APP_P4RT_CHANNEL_NAME)
-    self.response_consumer = swsscommon.NotificationConsumer(
-      self._p4rt_l3_multicast_route.appl_db, "APPL_DB_" +
-      swsscommon.APP_P4RT_TABLE_NAME + "_RESPONSE_CHANNEL")
 
     self._vrf_obj = test_vrf.TestVrf()
 
@@ -825,8 +815,8 @@ class TestP4RTL3MulticastRoute(object):
     mcast_router_intf_key, attr_list = (
         self._p4rt_l3_multicast_router_intf.create_router_interface(
             port_id, instance, src_mac))
-    util.verify_response(self.response_consumer, mcast_router_intf_key,
-                         attr_list, "SWSS_RC_SUCCESS")
+    self._p4rt_l3_multicast_router_intf.verify_response(mcast_router_intf_key,
+                                                        attr_list, "SWSS_RC_SUCCESS")
     rif_oid = self.get_added_rif_oid(start_asic_db_rif_entries)
     return rif_oid
 
@@ -838,8 +828,8 @@ class TestP4RTL3MulticastRoute(object):
     mcast_group_key, attr_list = (
         self._p4rt_l3_multicast_group_intf.create_multicast_group_entry(
             group_id=group_id))
-    util.verify_response(self.response_consumer, mcast_group_key,
-                         attr_list, "SWSS_RC_SUCCESS")
+    self._p4rt_l3_multicast_group_intf.verify_response(mcast_group_key,
+                                                       attr_list, "SWSS_RC_SUCCESS")
     group_oid = self.get_added_multicast_group_oid(start_asic_db_group_entries)
     return group_oid
 
@@ -891,8 +881,8 @@ class TestP4RTL3MulticastRoute(object):
     mcast_route_key, attr_list = (
         self._p4rt_l3_multicast_route.create_multicast_route(
             group_id=group_id, dst_ip=dst_ip, is_v4=is_v4))
-    util.verify_response(self.response_consumer, mcast_route_key,
-                         attr_list, "SWSS_RC_SUCCESS")
+    self._p4rt_ip_multicast.verify_response(mcast_route_key,
+                                            attr_list, "SWSS_RC_SUCCESS")
     if update:
       new_entries = 0
     else:
@@ -991,11 +981,11 @@ class TestP4RTL3MulticastRoute(object):
     # Delete operation
     ####################################
     self._p4rt_l3_multicast_route.remove_app_db_entry(mcast_route_key_v4)
-    util.verify_response(self.response_consumer, mcast_route_key_v4, [],
-                         "SWSS_RC_SUCCESS")
+    self._p4rt_ip_multicast.verify_response(mcast_route_key_v4, [],
+                                            "SWSS_RC_SUCCESS")
     self._p4rt_l3_multicast_route.remove_app_db_entry(mcast_route_key_v6)
-    util.verify_response(self.response_consumer, mcast_route_key_v6, [],
-                         "SWSS_RC_SUCCESS")
+    self._p4rt_ip_multicast.verify_response(mcast_route_key_v6, [],
+                                            "SWSS_RC_SUCCESS")
 
     # Check that APP DB entries were removed.
     route_app_db_entries_v4 = util.get_keys(
@@ -1044,26 +1034,26 @@ class TestP4RTL3MulticastRoute(object):
     # Create default router interface for next hop.
     router_interface_id, router_intf_key, attr_list = (
         self._p4rt_router_intf_obj.create_router_interface())
-    util.verify_response(
-        self.response_consumer, router_intf_key, attr_list, "SWSS_RC_SUCCESS")
+    self._p4rt_router_intf_obj.verify_response(
+        router_intf_key, attr_list, "SWSS_RC_SUCCESS")
     # Create neighbor.
     neighbor_id, neighbor_key, attr_list = (
         self._p4rt_neighbor_obj.create_neighbor())
-    util.verify_response(
-        self.response_consumer, neighbor_key, attr_list, "SWSS_RC_SUCCESS")
+    self._p4rt_neighbor_obj.verify_response(
+        neighbor_key, attr_list, "SWSS_RC_SUCCESS")
     # Create next hop.
     nexthop_id, nexthop_key, attr_list = (
         self._p4rt_nexthop_obj.create_next_hop())
-    util.verify_response(
-        self.response_consumer, nexthop_key, attr_list, "SWSS_RC_SUCCESS")
+    self._p4rt_nexthop_obj.verify_response(
+        nexthop_key, attr_list, "SWSS_RC_SUCCESS")
 
     # Now attempt to update.
     mcast_route_key_v4_update, attr_list_update = (
         self._p4rt_l3_multicast_route.create_multicast_route(
             action=self._p4rt_l3_multicast_route.SET_NEXT_HOP_ID_ACTION,
             param=nexthop_id))
-    util.verify_response(
-        self.response_consumer, mcast_route_key_v4_update, attr_list_update,
+    self._p4rt_ip_multicast.verify_response(
+        mcast_route_key_v4_update, attr_list_update,
         "SWSS_RC_NOT_FOUND",
         "[OrchAgent] Route entry exists in manager but does not exist in the centralized map")
 
@@ -1096,35 +1086,35 @@ class TestP4RTL3MulticastRoute(object):
     # Create default router interface for next hop.
     router_interface_id, router_intf_key, attr_list = (
         self._p4rt_router_intf_obj.create_router_interface())
-    util.verify_response(
-        self.response_consumer, router_intf_key, attr_list, "SWSS_RC_SUCCESS")
+    self._p4rt_router_intf_obj.verify_response(
+        router_intf_key, attr_list, "SWSS_RC_SUCCESS")
     # Create neighbor.
     neighbor_id, neighbor_key, attr_list = (
         self._p4rt_neighbor_obj.create_neighbor())
-    util.verify_response(
-        self.response_consumer, neighbor_key, attr_list, "SWSS_RC_SUCCESS")
+    self._p4rt_neighbor_obj.verify_response(
+        neighbor_key, attr_list, "SWSS_RC_SUCCESS")
     # Create next hop.
     nexthop_id, nexthop_key, attr_list = (
         self._p4rt_nexthop_obj.create_next_hop())
-    util.verify_response(
-        self.response_consumer, nexthop_key, attr_list, "SWSS_RC_SUCCESS")
+    self._p4rt_nexthop_obj.verify_response(
+        nexthop_key, attr_list, "SWSS_RC_SUCCESS")
 
     # Add original route entry that assigns the next hop.
     mcast_route_key_v4_update, attr_list_update = (
         self._p4rt_l3_multicast_route.create_multicast_route(
             action=self._p4rt_l3_multicast_route.SET_NEXT_HOP_ID_ACTION,
             param=nexthop_id))
-    util.verify_response(
-        self.response_consumer, mcast_route_key_v4_update, attr_list_update,
+    self._p4rt_ip_multicast.verify_response(
+        mcast_route_key_v4_update, attr_list_update,
         "SWSS_RC_SUCCESS")
 
     # Now attempt to update.
     mcast_route_key_v4_update, attr_list_update = (
         self._p4rt_l3_multicast_route.create_multicast_route())
-    util.verify_response(
-    self.response_consumer, mcast_route_key_v4_update, attr_list_update,
-    "SWSS_RC_NOT_FOUND",
-    ("[OrchAgent] Route entry exists in manager but does not exist in the centralized map"))
+    self._p4rt_ip_multicast.verify_response(
+        mcast_route_key_v4_update, attr_list_update,
+        "SWSS_RC_NOT_FOUND",
+        ("[OrchAgent] Route entry exists in manager but does not exist in the centralized map"))
 
     ####################################
     # Cleanup
@@ -1144,8 +1134,8 @@ class TestP4RTL3MulticastRoute(object):
         self._p4rt_l3_multicast_route.DEFAULT_DST_V4, ipv6_dst=None)
 
     self._p4rt_l3_multicast_route.remove_app_db_entry(mcast_route_key)
-    util.verify_response(
-        self.response_consumer, mcast_route_key, [], "SWSS_RC_NOT_FOUND",
+    self._p4rt_l3_multicast.verify_response(
+        mcast_route_key, [], "SWSS_RC_NOT_FOUND",
         "[OrchAgent] Route entry does not exist")
 
     ####################################
@@ -1163,8 +1153,8 @@ class TestP4RTL3MulticastRoute(object):
 
     mcast_route_key_v4_update, attr_list_update = (
         self._p4rt_l3_multicast_route.create_multicast_route())
-    util.verify_response(
-        self.response_consumer, mcast_route_key_v4_update, attr_list_update,
+    self._p4rt_l3_multicast.verify_response(
+        mcast_route_key_v4_update, attr_list_update,
         "SWSS_RC_NOT_FOUND",
         "[OrchAgent] No multicast group ID found for '0x1'")
 

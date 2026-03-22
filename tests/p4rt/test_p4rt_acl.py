@@ -1029,8 +1029,7 @@ class TestP4RTAcl(object):
 
         self._p4rt_acl_rule_obj.set_app_db_entry(
             table_name_with_rule_key2, attr_list)
-        util.verify_response(
-            self.response_consumer,
+        self._p4rt_acl_rule_obj.verify_response(
             table_name_with_rule_key2,
             attr_list,
             "SWSS_RC_SUCCESS",
