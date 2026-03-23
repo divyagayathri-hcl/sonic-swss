@@ -1,6 +1,8 @@
 """ Defines common P4RT utility functions."""
 from swsscommon import swsscommon
 
+
+import os
 import time
 import json
 
@@ -121,11 +123,64 @@ class DBInterface(object):
         self.appl_db = _set_up_appl_db(dvs)
         self.asic_db = _set_up_asic_db(dvs)
         self.appl_state_db = _set_up_appl_state_db(dvs)
-        wait_time_ms = 20000
-        self.zmq = swsscommon.ZmqClient("ipc://" + dvs.p4orch_zmq_sock, wait_time_ms)
-        self.zmq_db = swsscommon.DBConnector("APPL_DB", 0)
+        wait_time_ms = 5000
+        try:
+            self.zmq = swsscommon.ZmqClient("ipc://" + dvs.p4orch_zmq_sock, wait_time_ms)
+        except Exception as e:
+            # This will capture the error message from SWSS_LOG_THROW
+            print(f"[Divya Debug] FAILED TO CONNECT TO ZMQ: {str(e)}")
+            raise
+        # self.zmq_db = swsscommon.DBConnector("APPL_DB", 0)
+        self.zmq_db = swsscommon.DBConnector(swsscommon.APPL_DB, dvs.redis_sock, 0)
         self.zmq_tbl = swsscommon.ZmqProducerStateTable(
             self.zmq_db, self.APP_DB_TBL_NAME, self.zmq)
+    """
+
+    def set_up_databases(self, dvs, wait_time_ms=5000):
+        # Construct the IPC path from the DVS object
+        socket_path = dvs.p4orch_zmq_sock
+        endpoint = "ipc://" + socket_path
+
+        # 1. Wait for the physical socket file to appear in the shared volume
+        # This prevents the C++ constructor from hitting an immediate 'File Not Found'
+        max_retries = 10
+        print(f"DEBUG: Waiting for ZMQ socket at {socket_path}...")
+        while not os.path.exists(socket_path) and max_retries > 0:
+            time.sleep(1)
+            max_retries -= 1
+
+        if not os.path.exists(socket_path):
+            raise RuntimeError(f"Critical Error: ZMQ socket {socket_path} not found after timeout.")
+
+        # 2. Wrap the ZmqClient initialization in a try-except block
+        try:
+            print(f"DEBUG: Attempting to connect to {endpoint}")
+            # The actual crash happens inside this constructor call
+            self.zmq = swsscommon.ZmqClient(endpoint, wait_time_ms)
+
+            # Once ZMQ is up, initialize the Application State DB
+            self.appl_state_db = _set_up_appl_state_db(dvs)
+            print("DEBUG: swsscommon connections initialized successfully.")
+            self.appl_db = _set_up_appl_db(dvs)
+            self.asic_db = _set_up_asic_db(dvs)
+            self.zmq_db = swsscommon.DBConnector(0, , 0)
+            self.zmq_tbl = swsscommon.ZmqProducerStateTable(
+                self.zmq_db, self.APP_DB_TBL_NAME, self.zmq)
+
+        except Exception as e:
+            # Capture the THROWN message from zmqclient.cpp (e.g., zmqerrno: 111)
+            error_details = str(e)
+            print(f"\n[SWSSCOMMON ERROR] Connection failed: {error_details}")
+
+            # Provide human-readable hints based on the ZMQ error code
+            if "111" in error_details:
+                print("HINT: Connection Refused. The orchagent might have crashed or isn't listening.")
+            elif "2" in error_details:
+                print("HINT: No such file. Check if the docker volume mapping for /zmq_swss is correct.")
+
+            # Re-raise as a RuntimeError so pytest fails gracefully instead of Aborting
+            raise RuntimeError(f"Failed to initialize P4RT databases: {error_details}")
+    """
 
     def set_app_db_entry(self, key, attr_list):
         fvs = swsscommon.FieldValuePairs(attr_list)
