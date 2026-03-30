@@ -109,6 +109,9 @@ ReturnCodeOr<std::vector<sai_attribute_t>> AclTableManager::getTableSaiAttrs(
   if (acl_table.size > 0) {
     acl_attr.id = SAI_ACL_TABLE_ATTR_SIZE;
     acl_attr.value.u32 = acl_table.size;
+    if (acl_table.stage == SAI_ACL_STAGE_PRE_INGRESS) {
+      acl_attr.value.u32 = acl_table.size + 1;
+    }
     acl_attr_list.push_back(acl_attr);
   }
 
@@ -1001,6 +1004,15 @@ ReturnCode AclTableManager::removeAclGroupMember(P4AclTableDefinition &acl_table
     SWSS_LOG_NOTICE("ACL table member %s for table %s was removed successfully.",
                     sai_serialize_object_id(grp_mem_oid).c_str(), QuotedVar(acl_table.acl_table_name).c_str());
     return ReturnCode();
+}
+
+void AclTableManager::addDefaultAclRuleInAllPreIngressTables()
+{
+    for (const auto& table_name : m_aclTablesByStage[SAI_ACL_STAGE_PRE_INGRESS])
+    {
+        gP4Orch->getAclRuleManager()->addDefaultAclRuleInPreIngressTable(
+            table_name);
+    }
 }
 
 std::string AclTableManager::verifyState(const std::string &key, const std::vector<swss::FieldValueTuple> &tuple)

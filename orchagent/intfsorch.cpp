@@ -17,6 +17,7 @@
 #include "bufferorch.h"
 #include "directory.h"
 #include "vnetorch.h"
+#include "p4orch/p4orch.h"
 #include "subscriberstatetable.h"
 
 extern sai_object_id_t gVirtualRouterId;
@@ -39,6 +40,7 @@ extern string gMySwitchType;
 extern int32_t gVoqMySwitchId;
 extern bool gTraditionalFlexCounter;
 extern bool isChassisDbInUse();
+extern P4Orch *gP4Orch;
 
 const int intfsorch_pri = 35;
 
@@ -699,6 +701,7 @@ void IntfsOrch::doTask(Consumer &consumer)
             {
                 //Synced local interface. Skip
                 it = consumer.m_toSync.erase(it);
+                gP4Orch->getAclTableManager()->addDefaultAclRuleInAllPreIngressTables();
                 continue;
             }
         }

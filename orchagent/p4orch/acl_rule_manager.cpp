@@ -2088,6 +2088,15 @@ ReturnCode AclRuleManager::addDefaultAclRuleInPreIngressTable(
     const std::string& table_name) {
   SWSS_LOG_ENTER();
 
+  // Return if the default rule already created.
+  if (m_defaultVrfOverridePreingressRuleCreated[table_name]) {
+    SWSS_LOG_NOTICE(
+        "Default ACL rule in PRE_INGRESS table %s has already suceeded to "
+        "create.",
+        table_name.c_str());
+    return ReturnCode();
+  }
+
   const std::string cLoopbackAlias = "Loopback0";
   const auto* acl_table =
       gP4Orch->getAclTableManager()->getAclTable(table_name);
@@ -2161,6 +2170,7 @@ ReturnCode AclRuleManager::addDefaultAclRuleInPreIngressTable(
   SWSS_LOG_NOTICE(
       "Suceeded to create default ACL rule in PRE_INGRESS table %s : %s",
       table_name.c_str(), sai_serialize_object_id(acl_entry_oid).c_str());
+      m_defaultVrfOverridePreingressRuleCreated[table_name] = true;
   return ReturnCode();
 }
 

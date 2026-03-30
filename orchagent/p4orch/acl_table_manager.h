@@ -42,6 +42,9 @@ class AclTableManager : public ObjectManagerInterface
     // found.
     P4AclTableDefinition *getAclTable(const std::string &acl_table_name);
 
+    // Try to add default ACL rule in the ACL tables in PRE_INGRESS stage
+    void addDefaultAclRuleInAllPreIngressTables();
+
   private:
     // Validate ACL table definition APP_DB entry.
     ReturnCode validateAclTableDefinitionAppDbEntry(const P4AclTableDefinitionAppDbEntry &app_db_entry);
