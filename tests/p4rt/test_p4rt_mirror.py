@@ -1,9 +1,31 @@
-from swsscommon import swsscommon
+rom swsscommon import swsscommon
 
 import pytest
 import util
 import json
+import time
 
+@pytest.fixture(scope="module", autouse=True)
+def enable_p4rt_feature(dvs):
+    """ 
+    Automatically enables P4RT in ConfigDB and restarts orchagent 
+    to ensure ZMQ server is initialized.
+    """ 
+    conf_db = dvs.get_config_db()
+   
+    # 1. Enable P4RT in the FEATURE table
+    conf_db.set_entry("FEATURE", "p4rt", {"status": "enabled"})
+    
+    # 2. Restart orchagent to pick up the change and start ZMQ 
+    # Depending on your DVS setup, you might need to restart the container 
+    # or just the process.
+    dvs.stop_swss()
+    dvs.start_swss()
+    
+    # Give orchagent a moment to initialize the ZMQ server
+    time.sleep(2)
+    
+    yield
 
 class P4RtMirrorSessionWrapper(util.DBInterface):
     """Interface to interact with APP DB and ASIC DB tables for P4RT mirror session object."""

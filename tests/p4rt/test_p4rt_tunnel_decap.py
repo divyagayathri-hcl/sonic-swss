@@ -1,6 +1,7 @@
 # Lint as: python3
 from swsscommon import swsscommon
 
+import pytest
 import util
 import json
 import test_vrf

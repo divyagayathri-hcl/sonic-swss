@@ -6,12 +6,43 @@ import util
 import l3
 import l3_multicast
 import test_vrf
+import time
+
+@pytest.fixture(scope="module", autouse=True)
+def enable_p4rt_feature(dvs):
+    """
+    Automatically enables P4RT in ConfigDB and restarts orchagent
+    to ensure ZMQ server is initialized.
+    """
+    conf_db = dvs.get_config_db()
+
+    # 1. Enable P4RT in the FEATURE table
+    conf_db.set_entry("FEATURE", "p4rt", {"status": "enabled"})
+
+    # 2. Restart orchagent to pick up the change and start ZMQ
+    # Depending on your DVS setup, you might need to restart the container
+    # or just the process.
+    dvs.stop_swss()
+    dvs.start_swss()
+
+    # Give orchagent a moment to initialize the ZMQ server
+    time.sleep(2)
 
 
 class TestP4RTL3MulticastRouterInterface(object):
   """Tests interacting with multicast router interface table"""
 
   def _set_up(self, dvs):
+    # 1. Ensure P4RT is enabled in ConfigDB (especially after a dvs.restart())
+    conf_db = dvs.get_config_db()
+    entry = conf_db.get_entry("FEATURE", "p4rt")
+    if not entry or entry.get("status") != "enabled":
+        conf_db.set_entry("FEATURE", "p4rt", {"status": "enabled"})
+        # We must restart SWSS because your PR logic in orchdaemon.cpp 
+        # initializes the ZMQ server only during startup.
+        dvs.stop_swss()
+        dvs.start_swss()
+
     self._p4rt_l3_multicast_router_intf = (
         l3_multicast.P4RtL3MulticastRouterInterfaceWrapper())
 
@@ -25,6 +56,12 @@ class TestP4RTL3MulticastRouterInterface(object):
     self.next_hop_asic_db_table = self._p4rt_l3_multicast_router_intf.NEXT_HOP_ASIC_DB_TABLE_NAME
     self.neighbor_asic_db_table = self._p4rt_l3_multicast_router_intf.NEIGHBOR_ENTRY_ASIC_DB_TABLE_NAME
     self.my_mac_asic_db_table = self._p4rt_l3_multicast_router_intf.MY_MAC_ASIC_DB_TABLE_NAME
+
+    for i in range(20):
+        if util.get_port_oid_by_name(dvs, "Ethernet8"):
+            time.sleep(2) 
+            break
+        time.sleep(1)
 
   def _cleanup(self):
     self._p4rt_l3_multicast_router_intf.clean_up()
@@ -102,8 +139,7 @@ class TestP4RTL3MulticastRouterInterface(object):
          self._p4rt_l3_multicast_router_intf.DEFAULT_SRC_MAC),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_TYPE,
          self._p4rt_l3_multicast_router_intf.SAI_ATTR_TYPE_PORT),
-        (self._p4rt_l3_multicast_router_intf.SAI_ATTR_MTU,
-         self._p4rt_l3_multicast_router_intf.SAI_ATTR_DEFAULT_MTU),
+        (self._p4rt_l3_multicast_router_intf.SAI_ATTR_MTU, "1460"),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_PORT_ID, port_oid),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_V4_MCAST_ENABLE, "true"),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_V6_MCAST_ENABLE, "true"),
@@ -156,8 +192,7 @@ class TestP4RTL3MulticastRouterInterface(object):
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_SRC_MAC, new_src_mac),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_TYPE,
          self._p4rt_l3_multicast_router_intf.SAI_ATTR_TYPE_PORT),
-        (self._p4rt_l3_multicast_router_intf.SAI_ATTR_MTU,
-         self._p4rt_l3_multicast_router_intf.SAI_ATTR_DEFAULT_MTU),
+        (self._p4rt_l3_multicast_router_intf.SAI_ATTR_MTU, "1460"),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_PORT_ID, port_oid),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_V4_MCAST_ENABLE, "true"),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_V6_MCAST_ENABLE, "true"),
@@ -299,8 +334,7 @@ class TestP4RTL3MulticastRouterInterface(object):
          self._p4rt_l3_multicast_router_intf.DEFAULT_SRC_MAC),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_TYPE,
          self._p4rt_l3_multicast_router_intf.SAI_ATTR_TYPE_PORT),
-        (self._p4rt_l3_multicast_router_intf.SAI_ATTR_MTU,
-         self._p4rt_l3_multicast_router_intf.SAI_ATTR_DEFAULT_MTU),
+        (self._p4rt_l3_multicast_router_intf.SAI_ATTR_MTU, "1460"),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_PORT_ID, port_oid),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_V4_MCAST_ENABLE, "true"),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_V6_MCAST_ENABLE, "true"),
@@ -554,8 +588,7 @@ class TestP4RTL3MulticastRouterInterface(object):
          self._p4rt_l3_multicast_router_intf.DEFAULT_SRC_MAC),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_TYPE,
          self._p4rt_l3_multicast_router_intf.SAI_ATTR_TYPE_PORT),
-        (self._p4rt_l3_multicast_router_intf.SAI_ATTR_MTU,
-         self._p4rt_l3_multicast_router_intf.SAI_ATTR_DEFAULT_MTU),
+        (self._p4rt_l3_multicast_router_intf.SAI_ATTR_MTU, "1460"),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_PORT_ID, port_oid),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_V4_MCAST_ENABLE, "true"),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_V6_MCAST_ENABLE, "true"),
@@ -681,8 +714,7 @@ class TestP4RTL3MulticastRouterInterface(object):
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_SRC_MAC, new_src_mac),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_TYPE,
          self._p4rt_l3_multicast_router_intf.SAI_ATTR_TYPE_PORT),
-        (self._p4rt_l3_multicast_router_intf.SAI_ATTR_MTU,
-         self._p4rt_l3_multicast_router_intf.SAI_ATTR_DEFAULT_MTU),
+        (self._p4rt_l3_multicast_router_intf.SAI_ATTR_MTU, "1460"),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_PORT_ID, port_oid),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_V4_MCAST_ENABLE, "true"),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_V6_MCAST_ENABLE, "true"),
@@ -884,8 +916,7 @@ class TestP4RTL3MulticastRouterInterface(object):
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_TYPE,
          self._p4rt_l3_multicast_router_intf.SAI_ATTR_TYPE_SUB_PORT),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_OUTER_VLAN_ID, "291"),
-        (self._p4rt_l3_multicast_router_intf.SAI_ATTR_MTU,
-         self._p4rt_l3_multicast_router_intf.SAI_ATTR_DEFAULT_MTU),
+        (self._p4rt_l3_multicast_router_intf.SAI_ATTR_MTU, "1460"),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_PORT_ID, port_oid),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_V4_MCAST_ENABLE, "true"),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_V6_MCAST_ENABLE, "true"),
@@ -1012,8 +1043,7 @@ class TestP4RTL3MulticastRouterInterface(object):
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_TYPE,
          self._p4rt_l3_multicast_router_intf.SAI_ATTR_TYPE_SUB_PORT),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_OUTER_VLAN_ID, "291"),
-        (self._p4rt_l3_multicast_router_intf.SAI_ATTR_MTU,
-         self._p4rt_l3_multicast_router_intf.SAI_ATTR_DEFAULT_MTU),
+        (self._p4rt_l3_multicast_router_intf.SAI_ATTR_MTU, "1460"), 
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_PORT_ID, port_oid),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_V4_MCAST_ENABLE, "true"),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_V6_MCAST_ENABLE, "true"),
@@ -1215,8 +1245,7 @@ class TestP4RTL3MulticastRouterInterface(object):
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_TYPE,
          self._p4rt_l3_multicast_router_intf.SAI_ATTR_TYPE_SUB_PORT),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_OUTER_VLAN_ID, "291"),
-        (self._p4rt_l3_multicast_router_intf.SAI_ATTR_MTU,
-         self._p4rt_l3_multicast_router_intf.SAI_ATTR_DEFAULT_MTU),
+        (self._p4rt_l3_multicast_router_intf.SAI_ATTR_MTU, "1460"),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_PORT_ID, port_oid),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_V4_MCAST_ENABLE, "true"),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_V6_MCAST_ENABLE, "true"),
@@ -1343,8 +1372,7 @@ class TestP4RTL3MulticastRouterInterface(object):
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_TYPE,
          self._p4rt_l3_multicast_router_intf.SAI_ATTR_TYPE_SUB_PORT),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_OUTER_VLAN_ID, "291"),
-        (self._p4rt_l3_multicast_router_intf.SAI_ATTR_MTU,
-         self._p4rt_l3_multicast_router_intf.SAI_ATTR_DEFAULT_MTU),
+        (self._p4rt_l3_multicast_router_intf.SAI_ATTR_MTU, "1460"),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_PORT_ID, port_oid),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_V4_MCAST_ENABLE, "true"),
         (self._p4rt_l3_multicast_router_intf.SAI_ATTR_V6_MCAST_ENABLE, "true"),
@@ -1450,6 +1478,16 @@ class TestP4RTL3MulticastRouterInterface(object):
 class TestP4RTL3MulticastGroup(object):
   """Tests interacting with replication multicast table"""
   def _set_up(self, dvs):
+    # 1. Ensure P4RT is enabled in ConfigDB (especially after a dvs.restart())
+    conf_db = dvs.get_config_db()
+    entry = conf_db.get_entry("FEATURE", "p4rt")
+    if not entry or entry.get("status") != "enabled":
+        conf_db.set_entry("FEATURE", "p4rt", {"status": "enabled"})
+        # We must restart SWSS because your PR logic in orchdaemon.cpp 
+        # initializes the ZMQ server only during startup.
+        dvs.stop_swss()
+        dvs.start_swss()
+
     self._p4rt_l3_multicast_router_intf = (
         l3_multicast.P4RtL3MulticastRouterInterfaceWrapper())
     self._p4rt_l3_multicast_router_intf.set_up_databases(dvs)
@@ -1475,6 +1513,12 @@ class TestP4RTL3MulticastGroup(object):
         self._p4rt_l3_multicast_group_intf.L2_ASIC_DB_GROUP_MEMBER_TBL_NAME)
     self.asic_db_bridge_port_table = (
         self._p4rt_l3_multicast_router_intf.L2_ASIC_DB_TBL_NAME)
+
+    for i in range(20):
+        if util.get_port_oid_by_name(dvs, "Ethernet8"):
+            time.sleep(2) 
+            break
+        time.sleep(1)
 
   def _cleanup(self):
     self._p4rt_l3_multicast_router_intf.clean_up()
@@ -2266,6 +2310,16 @@ class TestP4RTL3MulticastGroup(object):
 class TestP4RTIpMulticast(object):
   """Tests for interacting with the route tables ipv4_multicast_table and ipv6_multicast_table"""
   def _set_up(self, dvs):
+    # 1. Ensure P4RT is enabled in ConfigDB (especially after a dvs.restart())
+    conf_db = dvs.get_config_db()
+    entry = conf_db.get_entry("FEATURE", "p4rt")
+    if not entry or entry.get("status") != "enabled":
+        conf_db.set_entry("FEATURE", "p4rt", {"status": "enabled"})
+        # We must restart SWSS because your PR logic in orchdaemon.cpp 
+        # initializes the ZMQ server only during startup.
+        dvs.stop_swss()
+        dvs.start_swss()
+
     self._p4rt_l3_multicast_router_intf = (
         l3_multicast.P4RtL3MulticastRouterInterfaceWrapper())
     self._p4rt_l3_multicast_router_intf.set_up_databases(dvs)
@@ -2291,6 +2345,12 @@ class TestP4RTIpMulticast(object):
         self._p4rt_ip_multicast.APP_DB_TBL_NAME + ":" +
             self._p4rt_ip_multicast.TBL_NAME_IPV6)
     self.asic_db_route_table = self._p4rt_ip_multicast.ASIC_DB_TBL_NAME
+
+    for i in range(20):
+        if util.get_port_oid_by_name(dvs, "Ethernet8"):
+            time.sleep(2) 
+            break
+        time.sleep(1)
 
   def _cleanup(self):
     self._p4rt_l3_multicast_router_intf.clean_up()

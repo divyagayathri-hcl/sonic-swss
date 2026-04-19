@@ -111,6 +111,14 @@ def set_interface_status(dvs, if_name, status = "down", server = 0):
     dvs.servers[0].runcmd("ip link set {} dev {}".format(status, if_name)) == 0
     time.sleep(1)
 
+def is_p4rt_enabled(dvs):
+    """ Helper to check if P4RT is enabled in ConfigDB """
+    conf_db = dvs.get_config_db()
+    entry = conf_db.get_entry("FEATURE", "p4rt")
+    if not entry:
+        return False
+    return entry.get("status") == "enabled"
+
 class DBInterface(object):
     """ Interface to interact with different redis databases on dvs."""
 
