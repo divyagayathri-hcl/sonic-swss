@@ -148,12 +148,12 @@ void P4Orch::doTask(ConsumerBase &consumer)
         }
         return;
     }
-
+/*
     if (!gPortsOrch->allPortsReady())
     {
         return;
     }
-
+*/
     const std::string table_name = consumer.getTableName();
     if (table_name != APP_P4RT_TABLE_NAME)
     {

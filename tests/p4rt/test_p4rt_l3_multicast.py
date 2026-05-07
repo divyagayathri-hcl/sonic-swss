@@ -8,27 +8,6 @@ import l3_multicast
 import test_vrf
 import time
 
-@pytest.fixture(scope="module", autouse=True)
-def enable_p4rt_feature(dvs):
-    """
-    Automatically enables P4RT in ConfigDB and restarts orchagent
-    to ensure ZMQ server is initialized.
-    """
-    conf_db = dvs.get_config_db()
-
-    # 1. Enable P4RT in the FEATURE table
-    conf_db.set_entry("FEATURE", "p4rt", {"status": "enabled"})
-
-    # 2. Restart orchagent to pick up the change and start ZMQ
-    # Depending on your DVS setup, you might need to restart the container
-    # or just the process.
-    dvs.stop_swss()
-    dvs.start_swss()
-
-    # Give orchagent a moment to initialize the ZMQ server
-    time.sleep(2)
-
-
 class TestP4RTL3MulticastRouterInterface(object):
   """Tests interacting with multicast router interface table"""
 
